@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naše dovolená v Málaze</title>
+    <!-- Přidání větší kompatibility napříč prohlížeči -->
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+    </style>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh; /* Použití viewport height pro zajištění pokrytí celé výšky obrazovky */
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: none;
+            color: white;
+            overflow: hidden; /* Zabránění případnému přetečení obsahu */
+        }
+
+        .slide.active {
+            opacity: 1;
+            display: block;
+        }
+
+        .slide-content {
+            position: absolute;
+            top: 10%;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Speciální styl pro úvodní slide */
+        #slide-1 .slide-content {
+            position: static;
+            padding-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .slide-title {
+            font-size: 3em;
+            margin-bottom: 0.5em;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            display: inline-block;
+            border-radius: 5px;
+        }
+
+        .slide-description {
+            font-size: 1.5em;
+            display: inline-block;
+            margin: 0 auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 15px 25px;
+            border-radius: 5px;
+            text-align: left;
+            max-width: 80%;
+        }
+
+        /* Vycentrování kontejneru pro popis */
+        .slide-content {
+            position: absolute;
+            top: 10%;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Styl pro odrážkové seznamy */
+        .slide-description ul {
+            list-style-position: inside;
+            margin: 0;
+            padding: 0;
+            text-align: left;
+        }
+
+        .slide-description li {
+            margin-bottom: 8px;
+            text-align: left;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .nav-button {
+            background-color: rgba(255, 255, 255, 0.7);
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1.2em;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-button:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Úvodní dlaždice fotek */
+        #slide-1 {
+            background-color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .photo-grid-container {
+            width: 100%;
+            margin-top: 20px;
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-auto-rows: 200px;
+            grid-gap: 10px;
+            padding: 20px;
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        .photo-tile {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .photo-tile:hover {
+            transform: scale(1.05);
+        }
+
+        .photo-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .photo-tile:hover .photo-caption {
+            opacity: 1;
+        }
+
+        /* Responzivní nastavení */
+        @media (max-width: 768px) {
+            .slide-title {
+                font-size: 2em;
+            }
+
+            .slide-description {
+                font-size: 1.2em;
+                max-width: 90%;
+            }
+
+            .photo-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                grid-auto-rows: 150px;
+            }
+
+            .navigation {
+                bottom: 10px;
+            }
+
+            .nav-button {
+                padding: 8px 16px;
+                font-size: 1em;
+            }
+
+            #slide-1 .slide-content {
+                padding-top: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .slide-title {
+                font-size: 1.5em;
+            }
+
+            .slide-description {
+                font-size: 1em;
+            }
+
+            .photo-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                grid-auto-rows: 100px;
+            }
+
+            .navigation {
+                bottom: 5px;
+            }
+
+            .nav-button {
+                padding: 6px 12px;
+                font-size: 0.9em;
+            }
+
+            #slide-1 .slide-content {
+                padding-top: 10px;
+            }
+        }
+
+        /* Přidání podpory pro orientaci obrazovky */
+        @media (orientation: portrait) {
+            .slide-content {
+                top: 15%;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Úvodní slide s dlaždicemi fotek -->
+<div id="slide-1" class="slide active">
+    <div class="slide-content">
+        <h1 class="slide-title">Málaga - město plné slunce, pláží, moře, umění, historie a úsměvů</h1>
+    </div>
+    <div class="photo-grid-container">
+        <div class="photo-grid" id="photo-grid">
+            <!-- Náhledy budou generovány dynamicky pomocí JavaScriptu -->
+        </div>
+    </div>
+</div>
+
+<!-- Slidy budou generovány dynamicky pomocí JavaScriptu -->
+
+<!-- Navigační tlačítka -->
+<div class="navigation">
+    <button class="nav-button" id="prev-button">Předchozí</button>
+    <button class="nav-button" id="next-button">Další</button>
+</div>
+
+<script>
+    // Definování slidů - zde budete upravovat obsah prezentace
+    // Pro každý slide potřebujete:
+    // - image: cesta k obrázku na pozadí (např. "images/foto1.jpg")
+    // - title: nadpis slidu
+    // - description: popis slidu - můžete použít HTML tagy, např. "<ul><li>bod 1</li><li>bod 2</li></ul>"
+    const slideData = [
+        {
+            // Úvodní stránka nemá obrázek na pozadí, má jen náhledy
+            title: "Málaga - město plné slunce, pláží, moře, umění, historie a úsměvů",
+            description: "Naše letní dobrodružství"
+        },
+        {
+            image: "images/krk.jpeg",
+            title: "Cesta do Málagy",
+            description: "Letěli jsme z polského Krakowa."
+        },
+        {
+            image: "images/map.png",
+            title: "Cesta do Málagy",
+            description: "Cesta trvala necelé 4 hodiny."
+        },
+        {
+            image: "images/plain.jpeg",
+            title: "Cesta do Málagy",
+            description: "Z letadla byly občas vidět krásné výhledy na Alpy."
+        },
+        {
+            image: "images/malaga.jpeg",
+            title: "Víš, že Málaga...",
+            description: "<ul>" +
+                "<li>...je město ve Španělsku, v kraji Andalusie?</li>" +
+                "<li>...leží u Středozemního moře?</li>" +
+                "<li>...má více než 300 slunečných dní v roce?</li>" +
+                "<li>...je domovem pro půl milionu lidí?</li>" +
+                "<li>...je rodištěm slavného malíře Picassa?</li>" +
+                "<li>...patří mezi nejstarší města v Evropě?</li>" +
+                "<li>...je rodištěm slavného malíře Picassa?</li>" +
+                "<li>...patří mezi nejstarší města v Evropě?</li>" +
+                "</ul>"
+        }
+    ];
+
+    // Dynamické generování slidů
+    function generateSlides() {
+        const slidesContainer = document.body;
+
+        // První slide již existuje, takže ho nemusíme generovat
+        // Aktualizujeme pouze titulek a popis
+        const firstSlideTitle = document.querySelector('#slide-1 .slide-title');
+        const firstSlideDesc = document.querySelector('#slide-1 .slide-description');
+
+        if (firstSlideTitle && firstSlideDesc) {
+            firstSlideTitle.textContent = slideData[0].title;
+            firstSlideDesc.innerHTML = slideData[0].description;
+        }
+
+        // Generování ostatních slidů (od indexu 1)
+        for (let i = 1; i < slideData.length; i++) {
+            const slide = document.createElement('div');
+            slide.id = `slide-${i + 1}`;
+            slide.className = 'slide';
+
+            // Zajištění správného načtení obrázku na pozadí
+            const img = new Image();
+            img.onload = function() {
+                // Obrázek se načetl správně, nastavíme ho jako pozadí
+                slide.style.backgroundImage = `url('${slideData[i].image}')`;
+            };
+            img.onerror = function() {
+                // Pokud se obrázek nenačte, použijeme záložní barvu
+                console.warn(`Obrázek ${slideData[i].image} se nepodařilo načíst.`);
+                slide.style.backgroundColor = '#555';
+            };
+            img.src = slideData[i].image;
+
+            const content = document.createElement('div');
+            content.className = 'slide-content';
+
+            const title = document.createElement('h2');
+            title.className = 'slide-title';
+            title.textContent = slideData[i].title;
+
+            // Vytvoříme wrapper pro popis, aby byl vždy pod nadpisem
+            const descWrapper = document.createElement('div');
+            descWrapper.style.width = '100%';
+            descWrapper.style.clear = 'both';
+            descWrapper.style.marginTop = '20px';
+
+            const desc = document.createElement('p');
+            desc.className = 'slide-description';
+            // Použití innerHTML místo textContent pro podporu HTML tagů
+            desc.innerHTML = slideData[i].description;
+
+            descWrapper.appendChild(desc);
+            content.appendChild(title);
+            content.appendChild(descWrapper);
+            slide.appendChild(content);
+
+            slidesContainer.appendChild(slide);
+        }
+    }
+
+    // Generování náhledů na úvodní stránce
+    function generatePhotoGrid() {
+        const grid = document.getElementById('photo-grid');
+        if (!grid) return; // Kontrola, zda element existuje
+
+        // Začínáme od indexu 1, protože první slide je úvodní stránka
+        for (let i = 1; i < slideData.length; i++) {
+            const tile = document.createElement('div');
+            tile.className = 'photo-tile';
+
+            // Přidání titulku jako popisku při najetí myší
+            const caption = document.createElement('div');
+            caption.className = 'photo-caption';
+            caption.textContent = slideData[i].title;
+
+            // Zajištění správného načtení obrázku
+            const img = new Image();
+            img.onload = function() {
+                // Obrázek se načetl správně
+                tile.style.backgroundImage = `url('${slideData[i].image}')`;
+            };
+            img.onerror = function() {
+                // Pokud se obrázek nenačte, použijeme záložní barvu
+                console.warn(`Náhled ${slideData[i].image} se nepodařilo načíst.`);
+                tile.style.backgroundColor = '#777';
+                tile.textContent = slideData[i].title;
+            };
+            img.src = slideData[i].image;
+
+            tile.onclick = function() { goToSlide(i + 1); };
+            tile.appendChild(caption);
+            grid.appendChild(tile);
+        }
+    }
+
+    // Najdeme všechny slidy
+    let slides;
+    let currentSlide = 0;
+
+    // Inicializace po načtení stránky
+    function initSlideshow() {
+        generateSlides();
+        generatePhotoGrid();
+
+        // Nyní najdeme všechny slidy
+        slides = document.querySelectorAll('.slide');
+
+        // Zobrazíme první slide
+        showSlide(0);
+
+        // Přidání událostí na tlačítka
+        document.getElementById('next-button').addEventListener('click', nextSlide);
+        document.getElementById('prev-button').addEventListener('click', prevSlide);
+
+        // Přidání ovládání pomocí klávesnice
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight') {
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+    }
+
+    // Funkce pro změnu slidů
+    function showSlide(index) {
+        // Ošetření krajních případů
+        if (index < 0) index = slides.length - 1;
+        if (index >= slides.length) index = 0;
+
+        // Skryjeme všechny slidy
+        slides.forEach(slide => {
+            slide.classList.remove('active');
+        });
+
+        // Zobrazíme aktuální slide
+        slides[index].classList.add('active');
+        currentSlide = index;
+    }
+
+    // Funkce pro přechod na konkrétní slide
+    function goToSlide(index) {
+        showSlide(index - 1); // Odečítáme 1, protože indexy začínají od 0
+    }
+
+    // Funkce pro posun na další slide
+    function nextSlide() {
+        showSlide(currentSlide + 1);
+    }
+
+    // Funkce pro posun na předchozí slide
+    function prevSlide() {
+        showSlide(currentSlide - 1);
+    }
+
+    // Spustíme inicializaci po načtení stránky
+    document.addEventListener('DOMContentLoaded', initSlideshow);
+</script>
+</body>
+</html>
